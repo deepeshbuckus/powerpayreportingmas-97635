@@ -103,29 +103,34 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
   if (Array.isArray(apiData.data[0])) {
     const tableData = apiData.data as string[][];
     return (
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {tableData[0]?.map((header, i) => (
-                <TableHead key={i} className="font-semibold">
-                  {header}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tableData.slice(1).map((row, i) => (
-              <TableRow key={i}>
-                {row.map((cell, j) => (
-                  <TableCell key={j} className="text-sm">
-                    {cell}
-                  </TableCell>
+      <div className="space-y-4">
+        {apiData.title && (
+          <h3 className="text-lg font-semibold text-gray-900">{apiData.title}</h3>
+        )}
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {tableData[0]?.map((header, i) => (
+                  <TableHead key={i} className="font-semibold">
+                    {header}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {tableData.slice(1).map((row, i) => (
+                <TableRow key={i}>
+                  {row.map((cell, j) => (
+                    <TableCell key={j} className="text-sm">
+                      {cell}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     );
   }
@@ -134,32 +139,37 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
   const headers = Object.keys(apiData.data[0]);
   
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-gray-200">
-            {headers.map((header, i) => (
-              <th key={i} className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">
-                {header.replace(/([A-Z])/g, ' $1').trim()}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {apiData.data.slice(0, 7).map((row, i) => (
-            <tr key={i} className="border-b border-gray-100">
-              {headers.map((header, j) => (
-                <td key={j} className="py-3 px-4 text-sm text-gray-700">
-                  {typeof row[header] === 'number' && header.toLowerCase().includes('pay') || 
-                   typeof row[header] === 'number' && header.toLowerCase().includes('deduction') ||
-                   typeof row[header] === 'number' && header.toLowerCase().includes('contribution') ? 
-                    `$${row[header].toLocaleString()}` : row[header]}
-                </td>
+    <div className="space-y-4">
+      {apiData.title && (
+        <h3 className="text-lg font-semibold text-gray-900">{apiData.title}</h3>
+      )}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b border-gray-200">
+              {headers.map((header, i) => (
+                <th key={i} className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">
+                  {header.replace(/([A-Z])/g, ' $1').trim()}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {apiData.data.slice(0, 7).map((row, i) => (
+              <tr key={i} className="border-b border-gray-100">
+                {headers.map((header, j) => (
+                  <td key={j} className="py-3 px-4 text-sm text-gray-700">
+                    {typeof row[header] === 'number' && header.toLowerCase().includes('pay') || 
+                     typeof row[header] === 'number' && header.toLowerCase().includes('deduction') ||
+                     typeof row[header] === 'number' && header.toLowerCase().includes('contribution') ? 
+                      `$${row[header].toLocaleString()}` : row[header]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
