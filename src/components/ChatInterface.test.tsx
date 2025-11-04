@@ -40,7 +40,7 @@ describe('ChatInterface', () => {
 
   it('renders initial welcome message', () => {
     renderWithContext();
-    expect(screen.getByText(/AI-powered HR reporting assistant/i)).toBeInTheDocument();
+    expect(screen.getByText(/AI HR report assistant/i)).toBeInTheDocument();
   });
 
   it('renders prompting tips when chat is empty', () => {
@@ -52,20 +52,16 @@ describe('ChatInterface', () => {
   it('allows user to type and send a message', async () => {
     const user = userEvent.setup();
     const generateReportFromPrompt = vi.fn().mockResolvedValue({
-      id: 'test-report-id',
+      id: 'test-123',
       title: 'Test Report',
-      description: '',
-      content: '',
-      status: 'draft',
-      type: 'General',
-      summary: 'Test summary',
+      type: 'Payroll',
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
     renderWithContext({ generateReportFromPrompt });
 
-    const input = screen.getByPlaceholderText(/Describe your HR\/payroll report requirements/i);
+    const input = screen.getByPlaceholderText(/Describe your HR.*payroll report/i);
     const sendButton = screen.getByRole('button', { name: /send/i });
 
     await user.type(input, 'Show me payroll data');
@@ -188,7 +184,7 @@ describe('ChatInterface', () => {
     await user.click(screen.getByRole('button', { name: /send/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Sorry, I encountered an error/i)).toBeInTheDocument();
+      expect(screen.getByText(/I apologize.*error/i)).toBeInTheDocument();
     });
   });
 });

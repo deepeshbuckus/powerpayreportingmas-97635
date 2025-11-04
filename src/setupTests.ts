@@ -27,6 +27,22 @@ global.IntersectionObserver = class IntersectionObserver {
   unobserve() {}
 } as any;
 
+// Mock URL and Blob for CSV export tests
+global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+global.URL.revokeObjectURL = vi.fn();
+
+// Mock Blob if not available
+if (typeof Blob === 'undefined') {
+  global.Blob = class Blob {
+    constructor(parts: any[], options?: any) {}
+  } as any;
+}
+
+// Mock HTMLAnchorElement.click
+if (typeof HTMLAnchorElement !== 'undefined') {
+  HTMLAnchorElement.prototype.click = vi.fn();
+}
+
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};

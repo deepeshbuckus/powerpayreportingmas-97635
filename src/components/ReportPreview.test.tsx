@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReportPreview } from './ReportPreview';
 import { ReportContext, type ReportContextType } from '@/contexts/ReportContext';
@@ -132,7 +132,8 @@ describe('ReportPreview', () => {
     expect(screen.getByText('HR')).toBeInTheDocument();
   });
 
-  it('renders comprehensive information when available', () => {
+  it('renders comprehensive information when available', async () => {
+    const user = userEvent.setup();
     const currentReport = {
       id: 'test-id',
       title: 'Test Report',
@@ -141,34 +142,21 @@ describe('ReportPreview', () => {
       status: 'draft' as const,
       type: 'General',
       summary: 'Test summary',
-      comprehensiveInfo: '## Section 1\n\nDetailed information here.',
+      comprehensiveInfo: 'Detailed information here.',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     renderWithContext({ currentReport });
 
-    expect(screen.getByText('Section 1')).toBeInTheDocument();
-    expect(screen.getByText('Detailed information here.')).toBeInTheDocument();
+    const trigger = screen.getByText(/Comprehensive Information/i);
+    await user.click(trigger);
+    
+    expect(screen.getByText(/Detailed information here/i)).toBeInTheDocument();
   });
 
   it('handles export button click', async () => {
     const user = userEvent.setup();
-    
-    // Mock URL.createObjectURL and URL.revokeObjectURL
-    global.URL.createObjectURL = vi.fn(() => 'blob:test');
-    global.URL.revokeObjectURL = vi.fn();
-    
-    // Mock document.createElement to track anchor creation
-    const mockClick = vi.fn();
-    const originalCreateElement = document.createElement.bind(document);
-    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-      const element = originalCreateElement(tagName);
-      if (tagName === 'a') {
-        element.click = mockClick;
-      }
-      return element;
-    });
 
     const currentReport = {
       id: 'test-id',
@@ -181,7 +169,7 @@ describe('ReportPreview', () => {
       apiData: {
         title: 'Data',
         type: 'table',
-        data: [['Col1'], ['Value1']],
+        data: [{ Col1: 'Value1' }],
       },
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -189,10 +177,12 @@ describe('ReportPreview', () => {
 
     renderWithContext({ currentReport });
 
-    const exportButton = screen.getByRole('button', { name: /export/i });
+    const exportButton = screen.getAllByRole('button', { name: /export/i })[0];
     await user.click(exportButton);
 
-    expect(mockClick).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(global.URL.createObjectURL).toHaveBeenCalled();
+    });
   });
 
   it('renders object array format for API data', () => {

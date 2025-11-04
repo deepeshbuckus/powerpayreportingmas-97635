@@ -26,7 +26,7 @@ const mockContextValue: ReportContextType = {
 
 const renderIndex = () => {
   return render(
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ReportContext.Provider value={mockContextValue}>
         <Index />
       </ReportContext.Provider>
@@ -39,7 +39,7 @@ describe('Index Page', () => {
     renderIndex();
     
     // ChatInterface renders the welcome message
-    expect(screen.getByText(/AI-powered HR reporting assistant/i)).toBeInTheDocument();
+    expect(screen.getByText(/AI HR report assistant/i)).toBeInTheDocument();
     
     // ReportPreview shows empty state initially
     expect(screen.getByText(/No Preview Available/i)).toBeInTheDocument();

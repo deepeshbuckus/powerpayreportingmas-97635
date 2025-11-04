@@ -15,7 +15,7 @@ vi.mock('react-router-dom', async () => {
 
 const renderNotFound = () => {
   return render(
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <NotFound />
     </BrowserRouter>
   );

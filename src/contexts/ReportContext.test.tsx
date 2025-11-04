@@ -47,7 +47,7 @@ describe('ReportContext', () => {
 
     const report = await result.current.generateReportFromPrompt('Test prompt');
 
-    expect(mockStartConversation).toHaveBeenCalled();
+    expect(mockStartConversation).toHaveBeenCalledWith({ prompt: 'Test prompt' });
     expect(report).toBeDefined();
     expect(report.title).toBeTruthy();
   });
@@ -70,7 +70,7 @@ describe('ReportContext', () => {
 
     const response = await result.current.startNewChat('Test prompt');
 
-    expect(mockStartConversation).toHaveBeenCalled();
+    expect(mockStartConversation).toHaveBeenCalledWith({ prompt: 'Test prompt' });
     expect(response.conversationId).toBeTruthy();
     expect(response.messageId).toBeTruthy();
   });
@@ -93,12 +93,12 @@ describe('ReportContext', () => {
 
     await result.current.sendChatMessage('conv-123', 'Follow-up prompt');
 
-    expect(mockContinueConversation).toHaveBeenCalled();
+    expect(mockContinueConversation).toHaveBeenCalledWith('conv-123', { prompt: 'Follow-up prompt' });
   });
 
   it('fetches attachment result', async () => {
     mockGetReportData.mockResolvedValue({
-      response: [
+      data: [
         {
           title: 'Attachment Data',
           type: 'table',
@@ -116,7 +116,7 @@ describe('ReportContext', () => {
     expect(mockGetReportData).toHaveBeenCalledWith('report-123', 'msg-123');
   });
 
-  it('sets current report', () => {
+  it('sets current report', async () => {
     const { result } = renderHook(() => useReports(), {
       wrapper: ReportProvider,
     });
@@ -134,7 +134,7 @@ describe('ReportContext', () => {
 
     result.current.setCurrentReport(testReport);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(result.current.currentReport).toEqual(testReport);
     });
   });

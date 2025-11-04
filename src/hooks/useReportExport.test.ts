@@ -29,7 +29,7 @@ describe('useReportExport', () => {
       ],
     };
 
-    mockExportReportToCSV.mockResolvedValue(undefined);
+    mockExportReportToCSV.mockImplementation(() => {});
 
     const { result } = renderHook(() => useReportExport());
 
@@ -52,13 +52,18 @@ describe('useReportExport', () => {
       data: [],
     };
 
-    mockExportReportToCSV.mockRejectedValue(new Error('Export failed'));
+    mockExportReportToCSV.mockImplementation(() => {
+      throw new Error('Export failed');
+    });
 
     const { result } = renderHook(() => useReportExport());
 
     await expect(result.current.exportReport(mockReport as any)).rejects.toThrow('Export failed');
-    expect(result.current.error).toBeInstanceOf(Error);
-    expect(result.current.exporting).toBe(false);
+    
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.exporting).toBe(false);
+    });
   });
 
   it('sets exporting state correctly', async () => {
@@ -93,15 +98,23 @@ describe('useReportExport', () => {
     };
 
     mockExportReportToCSV
-      .mockRejectedValueOnce(new Error('First error'))
-      .mockResolvedValueOnce(undefined);
+      .mockImplementationOnce(() => {
+        throw new Error('First error');
+      })
+      .mockImplementationOnce(() => {});
 
     const { result } = renderHook(() => useReportExport());
 
     await expect(result.current.exportReport(mockReport as any)).rejects.toThrow();
-    expect(result.current.error).toBeInstanceOf(Error);
+    
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(Error);
+    });
 
     await result.current.exportReport(mockReport as any);
-    expect(result.current.error).toBeNull();
+    
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
   });
 });
