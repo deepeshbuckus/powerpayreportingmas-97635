@@ -416,6 +416,7 @@ export const ChatInterface = () => {
             onClick={handleSendMessage}
             className="px-3"
             disabled={!inputValue.trim() || isGenerating}
+            aria-label="Send message"
           >
             {isGenerating ? (
               <Loader2 className="w-4 h-4 animate-spin" />

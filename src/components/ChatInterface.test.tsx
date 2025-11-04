@@ -62,7 +62,7 @@ describe('ChatInterface', () => {
     renderWithContext({ generateReportFromPrompt });
 
     const input = screen.getByPlaceholderText(/Describe your HR.*payroll report/i);
-    const sendButton = screen.getByRole('button', { name: /send/i });
+    const sendButton = screen.getByRole('button', { name: /send message/i });
 
     await user.type(input, 'Show me payroll data');
     await user.click(sendButton);
@@ -75,7 +75,7 @@ describe('ChatInterface', () => {
   it('disables send button when input is empty', () => {
     renderWithContext();
 
-    const sendButton = screen.getByRole('button', { name: /send/i });
+    const sendButton = screen.getByRole('button', { name: /send message/i });
     expect(sendButton).toBeDisabled();
   });
 
@@ -113,7 +113,7 @@ describe('ChatInterface', () => {
 
     const input = screen.getByPlaceholderText(/Describe your HR\/payroll report requirements/i);
     await userEvent.setup().type(input, 'Test query');
-    await userEvent.setup().click(screen.getByRole('button', { name: /send/i }));
+    await userEvent.setup().click(screen.getByRole('button', { name: /send message/i }));
 
     // Wait for the response
     await waitFor(() => {
@@ -166,7 +166,7 @@ describe('ChatInterface', () => {
 
     const input = screen.getByPlaceholderText(/Describe your HR\/payroll report requirements/i) as HTMLInputElement;
     await user.type(input, 'Test prompt');
-    await user.click(screen.getByRole('button', { name: /send/i }));
+    await user.click(screen.getByRole('button', { name: /send message/i }));
 
     await waitFor(() => {
       expect(input.value).toBe('');
@@ -181,7 +181,7 @@ describe('ChatInterface', () => {
 
     const input = screen.getByPlaceholderText(/Describe your HR\/payroll report requirements/i);
     await user.type(input, 'Test prompt');
-    await user.click(screen.getByRole('button', { name: /send/i }));
+    await user.click(screen.getByRole('button', { name: /send message/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/I apologize.*error/i)).toBeInTheDocument();

@@ -76,8 +76,11 @@ describe('useReportGenerator', () => {
     const { result } = renderHook(() => useReportGenerator());
 
     await expect(result.current.startNewReport('Test prompt')).rejects.toThrow('API Error');
-    expect(result.current.error).toBeInstanceOf(Error);
-    expect(result.current.generating).toBe(false);
+    
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.generating).toBe(false);
+    });
   });
 
   it('handles errors in continueConversation', async () => {
@@ -88,7 +91,10 @@ describe('useReportGenerator', () => {
     await expect(
       result.current.continueConversation('conv-123', 'Follow-up')
     ).rejects.toThrow('API Error');
-    expect(result.current.error).toBeInstanceOf(Error);
+    
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(Error);
+    });
   });
 
   it('sets generating state correctly', async () => {
@@ -125,9 +131,15 @@ describe('useReportGenerator', () => {
     const { result } = renderHook(() => useReportGenerator());
 
     await expect(result.current.startNewReport('Test')).rejects.toThrow();
-    expect(result.current.error).toBeInstanceOf(Error);
+    
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(Error);
+    });
 
     await result.current.startNewReport('Test again');
-    expect(result.current.error).toBeNull();
+    
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
   });
 });
