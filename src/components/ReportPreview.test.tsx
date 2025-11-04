@@ -51,6 +51,11 @@ describe('ReportPreview', () => {
       status: 'draft' as const,
       type: 'General',
       summary: 'This report shows payroll data for Q4 2024',
+      apiData: {
+        title: 'Payroll Data',
+        type: 'table',
+        data: [['Name', 'Amount'], ['John', '1000']],
+      },
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -71,6 +76,11 @@ describe('ReportPreview', () => {
       type: 'General',
       summary: 'Test summary',
       keyInsights: ['Insight 1', 'Insight 2'],
+      apiData: {
+        title: 'Data',
+        type: 'table',
+        data: [['Col1'], ['Val1']],
+      },
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -91,6 +101,11 @@ describe('ReportPreview', () => {
       type: 'General',
       summary: 'Test summary',
       suggestedPrompts: ['Next step 1', 'Next step 2'],
+      apiData: {
+        title: 'Data',
+        type: 'table',
+        data: [['Col1'], ['Val1']],
+      },
       createdAt: new Date(),
       updatedAt: new Date(),
     };
