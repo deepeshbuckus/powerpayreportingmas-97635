@@ -54,12 +54,10 @@ describe('usePowerPay hooks', () => {
   describe('useReports', () => {
     it('fetches reports successfully', async () => {
       const mockClient = {
-        getReports: vi.fn().mockResolvedValue({
-          reports: [
-            { report_id: '1', name: 'Report 1' },
-            { report_id: '2', name: 'Report 2' },
-          ],
-        }),
+        getReports: vi.fn().mockResolvedValue([
+          { report_id: '1', name: 'Report 1' },
+          { report_id: '2', name: 'Report 2' },
+        ]),
       } as any;
 
       const { result } = renderHook(() => useReports(mockClient), {
@@ -71,6 +69,7 @@ describe('usePowerPay hooks', () => {
       });
 
       expect(Array.isArray(result.current.data)).toBe(true);
+      expect(result.current.data).toHaveLength(2);
       expect(mockClient.getReports).toHaveBeenCalled();
     });
 
@@ -186,7 +185,7 @@ describe('usePowerPay hooks', () => {
 
       await result.current.mutateAsync({ prompt: 'Test prompt' });
 
-      expect(mockClient.startConversation).toHaveBeenCalledWith('Test prompt');
+      expect(mockClient.startConversation).toHaveBeenCalledWith({ prompt: 'Test prompt' });
     });
   });
 
@@ -205,7 +204,7 @@ describe('usePowerPay hooks', () => {
 
       await result.current.mutateAsync({ prompt: 'Follow-up prompt' });
 
-      expect(mockClient.continueConversation).toHaveBeenCalledWith('conv-123', 'Follow-up prompt');
+      expect(mockClient.continueConversation).toHaveBeenCalledWith('conv-123', { prompt: 'Follow-up prompt' });
     });
   });
 });

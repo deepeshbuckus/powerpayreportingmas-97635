@@ -158,6 +158,11 @@ describe('ReportPreview', () => {
       type: 'General',
       summary: 'Test summary',
       comprehensiveInfo: 'Detailed information here.',
+      apiData: {
+        title: 'Data',
+        type: 'table',
+        data: [['Col1'], ['Val1']],
+      },
       createdAt: new Date(),
       updatedAt: new Date(),
     };

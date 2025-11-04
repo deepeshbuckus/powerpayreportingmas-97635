@@ -32,18 +32,16 @@ describe('NotFound Page', () => {
     expect(screen.getByText(/Page Not Found/i)).toBeInTheDocument();
   });
 
-  it('has a button to go back home', () => {
+  it('has a link to go back home', () => {
     renderNotFound();
-    expect(screen.getByRole('button', { name: /Go Back Home/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Return to Home/i })).toBeInTheDocument();
   });
 
-  it('navigates to home when button is clicked', async () => {
+  it('navigates to home when link is clicked', async () => {
     const user = userEvent.setup();
     renderNotFound();
 
-    const homeButton = screen.getByRole('button', { name: /Go Back Home/i });
-    await user.click(homeButton);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/');
+    const homeLink = screen.getByRole('link', { name: /Return to Home/i });
+    expect(homeLink).toHaveAttribute('href', '/');
   });
 });
