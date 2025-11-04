@@ -23,7 +23,7 @@ export interface Report {
   };
 }
 
-interface ReportContextType {
+export interface ReportContextType {
   reports: Report[];
   currentReport: Report | null;
   messageId: string | null;
@@ -42,7 +42,7 @@ interface ReportContextType {
   fetchConversationMessages: (conversationId: string) => Promise<void>;
 }
 
-const ReportContext = createContext<ReportContextType | undefined>(undefined);
+export const ReportContext = createContext<ReportContextType | undefined>(undefined);
 
 export const useReports = () => {
   const context = useContext(ReportContext);
