@@ -312,7 +312,7 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-subtle">
-      <div className="p-4 border-b bg-card/50">
+      <div className="p-4 border-b bg-card/50 min-h-[72px] flex flex-col justify-center">
         <h2 className="font-semibold text-foreground">HR Report Assistant</h2>
         <p className="text-sm text-muted-foreground">Describe the HR or payroll report you want to generate</p>
       </div>

@@ -260,7 +260,7 @@ export const ReportPreview = () => {
   };
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b bg-card/50 flex items-center justify-between">
+      <div className="p-4 border-b bg-card/50 flex items-center justify-between min-h-[72px]">
         <div>
           <h2 className="font-semibold text-foreground">Report Preview</h2>
           <p className="text-sm text-muted-foreground">Live preview of your generated report</p>
