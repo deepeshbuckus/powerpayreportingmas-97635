@@ -74,7 +74,7 @@ const renderTable = (tableLines: string[], key: number) => {
         <TableHeader>
           <TableRow>
             {headers.map((header, i) => (
-              <TableHead key={i} className="font-semibold">
+              <TableHead key={i} className="font-semibold whitespace-nowrap">
                 {header}
               </TableHead>
             ))}
@@ -84,7 +84,7 @@ const renderTable = (tableLines: string[], key: number) => {
           {rows.map((row, i) => (
             <TableRow key={i}>
               {row.map((cell, j) => (
-                <TableCell key={j}>
+                <TableCell key={j} className="whitespace-nowrap">
                   {cell}
                 </TableCell>
               ))}
@@ -112,7 +112,7 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
             <TableHeader>
               <TableRow>
                 {tableData[0]?.map((header, i) => (
-                  <TableHead key={i} className="font-semibold">
+                  <TableHead key={i} className="font-semibold whitespace-nowrap">
                     {header}
                   </TableHead>
                 ))}
@@ -122,7 +122,7 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
               {tableData.slice(1).map((row, i) => (
                 <TableRow key={i}>
                   {row.map((cell, j) => (
-                    <TableCell key={j} className="text-sm">
+                    <TableCell key={j} className="text-sm whitespace-nowrap">
                       {cell}
                     </TableCell>
                   ))}
@@ -148,7 +148,7 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
           <thead>
             <tr className="border-b border-gray-200">
               {headers.map((header, i) => (
-                <th key={i} className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">
+                <th key={i} className="text-left py-3 px-4 font-semibold text-gray-900 text-sm whitespace-nowrap">
                   {header.replace(/([A-Z])/g, ' $1').trim()}
                 </th>
               ))}
@@ -158,7 +158,7 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
             {apiData.data.slice(0, 7).map((row, i) => (
               <tr key={i} className="border-b border-gray-100">
                 {headers.map((header, j) => (
-                  <td key={j} className="py-3 px-4 text-sm text-gray-700">
+                  <td key={j} className="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">
                     {typeof row[header] === 'number' && header.toLowerCase().includes('pay') || 
                      typeof row[header] === 'number' && header.toLowerCase().includes('deduction') ||
                      typeof row[header] === 'number' && header.toLowerCase().includes('contribution') ? 
