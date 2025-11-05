@@ -84,6 +84,12 @@ const Dashboard = () => {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [currentReportId, setCurrentReportId] = useState<UUID | null>(null);
   const [currentPrompt, setCurrentPrompt] = useState("");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingReport, setEditingReport] = useState<{
+    id: string;
+    name: string;
+    description: string;
+  } | null>(null);
 
   const handleChatRedirect = async () => {
     if (!chatInput.trim() || isStartingChat) return;
@@ -342,18 +348,16 @@ const Dashboard = () => {
                         size="default" 
                         className="flex-1"
                         onClick={() => {
-                          if (report.reportName) {
-                            handleEditReport(report.conversationId);
-                          } else {
-                            const newName = prompt('Enter new report name:', report.reportName || '');
-                            if (newName && newName.trim()) {
-                              handleUpdateReportName(report.conversationId, newName.trim());
-                            }
-                          }
+                          setEditingReport({
+                            id: report.conversationId,
+                            name: report.reportName || '',
+                            description: report.defaultTitle || ''
+                          });
+                          setEditDialogOpen(true);
                         }}
                       >
                         <Edit className="w-4 h-4 mr-2" />
-                        {report.reportName ? 'Edit report' : 'Set name'}
+                        Edit
                       </Button>
                       <Button 
                         size="default" 
@@ -448,6 +452,22 @@ const Dashboard = () => {
         reportId={currentReportId || ''}
         initialPrompt={currentPrompt}
       />
+
+      {/* Edit Report Dialog */}
+      {editingReport && (
+        <SaveReportDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          reportId={editingReport.id as UUID}
+          mode="edit"
+          initialName={editingReport.name}
+          initialDescription={editingReport.description}
+          onSaveSuccess={() => {
+            // Reports will auto-refetch due to query invalidation in useSaveReport
+            setEditingReport(null);
+          }}
+        />
+      )}
     </div>
   );
 };

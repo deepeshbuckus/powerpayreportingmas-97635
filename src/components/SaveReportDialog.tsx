@@ -21,14 +21,22 @@ interface SaveReportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   reportId: UUID;
-  initialPrompt: string;
+  initialPrompt?: string;
+  mode?: 'create' | 'edit';
+  initialName?: string;
+  initialDescription?: string;
+  onSaveSuccess?: () => void;
 }
 
 export function SaveReportDialog({ 
   open, 
   onOpenChange, 
   reportId,
-  initialPrompt 
+  initialPrompt = '',
+  mode = 'create',
+  initialName = '',
+  initialDescription = '',
+  onSaveSuccess
 }: SaveReportDialogProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -39,9 +47,13 @@ export function SaveReportDialog({
   const saveReportMutation = useSaveReport(powerPayClient);
 
   const [name, setName] = useState(
-    initialPrompt.length > 50 ? initialPrompt.substring(0, 50) + "..." : initialPrompt
+    mode === 'edit' 
+      ? initialName 
+      : initialPrompt.length > 50 ? initialPrompt.substring(0, 50) + "..." : initialPrompt
   );
-  const [description, setDescription] = useState(initialPrompt);
+  const [description, setDescription] = useState(
+    mode === 'edit' ? initialDescription : initialPrompt
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -62,33 +74,39 @@ export function SaveReportDialog({
         description: description.trim()
       });
 
-      // Fetch conversation messages
-      const messagesResponse = await powerPayClient.getConversationMessages(reportId);
-      const allMessages = messagesResponse.messages || [];
-
-      // Transform messages to chat format
-      const transformedMessages = allMessages.map((msg, index) => ({
-        id: msg.message_id || `msg-${index}`,
-        message_id: msg.message_id,
-        content: msg.prompt || '',
-        role: msg.role,
-        prompt: msg.prompt,
-        response: msg.role === 'assistant' && Array.isArray(msg.response) ? msg.response : null,
-        tableData: msg.role === 'assistant' && Array.isArray(msg.response) ? msg.response : null,
-        timestamp: new Date().toISOString()
-      }));
-
-      // Store chat history and conversation ID
-      localStorage.setItem('loadedChatHistory', JSON.stringify(transformedMessages));
-      localStorage.setItem('loadedConversationId', reportId);
-
       toast({
         title: "Success",
-        description: "Report saved successfully"
+        description: mode === 'edit' ? "Report updated successfully" : "Report saved successfully"
       });
 
       onOpenChange(false);
-      navigate("/chat");
+
+      if (mode === 'create') {
+        // Fetch conversation messages
+        const messagesResponse = await powerPayClient.getConversationMessages(reportId);
+        const allMessages = messagesResponse.messages || [];
+
+        // Transform messages to chat format
+        const transformedMessages = allMessages.map((msg, index) => ({
+          id: msg.message_id || `msg-${index}`,
+          message_id: msg.message_id,
+          content: msg.prompt || '',
+          role: msg.role,
+          prompt: msg.prompt,
+          response: msg.role === 'assistant' && Array.isArray(msg.response) ? msg.response : null,
+          tableData: msg.role === 'assistant' && Array.isArray(msg.response) ? msg.response : null,
+          timestamp: new Date().toISOString()
+        }));
+
+        // Store chat history and conversation ID
+        localStorage.setItem('loadedChatHistory', JSON.stringify(transformedMessages));
+        localStorage.setItem('loadedConversationId', reportId);
+
+        navigate("/chat");
+      } else {
+        // Edit mode - trigger refetch
+        onSaveSuccess?.();
+      }
     } catch (error) {
       console.error('Failed to save report:', error);
       toast({
@@ -105,9 +123,11 @@ export function SaveReportDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Save Report</DialogTitle>
+          <DialogTitle>{mode === 'edit' ? 'Edit Report' : 'Save Report'}</DialogTitle>
           <DialogDescription>
-            Enter a name and description for your new report
+            {mode === 'edit' 
+              ? 'Update the name and description for your report' 
+              : 'Enter a name and description for your new report'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -148,7 +168,7 @@ export function SaveReportDialog({
             disabled={isSaving || !name.trim()}
           >
             {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Save Report
+            {mode === 'edit' ? 'Update Report' : 'Save Report'}
           </Button>
         </DialogFooter>
       </DialogContent>
