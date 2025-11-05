@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Eye, Share2, Loader2, Lightbulb, Info, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReports } from "@/contexts/ReportContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
@@ -281,7 +280,7 @@ export const ReportPreview = () => {
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
+      <div className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-6">
           {currentReport ? (
             <div className="bg-white p-8 rounded-lg shadow-sm border">
@@ -443,7 +442,7 @@ export const ReportPreview = () => {
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
