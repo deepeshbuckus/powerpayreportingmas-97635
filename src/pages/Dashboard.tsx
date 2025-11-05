@@ -372,13 +372,14 @@ const Dashboard = () => {
 
           {/* Pagination */}
           {!loading && totalPages > 1 && (
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-8 py-4">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious 
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === 1}
                     />
                   </PaginationItem>
                   
@@ -414,6 +415,7 @@ const Dashboard = () => {
                     <PaginationNext 
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === totalPages}
                     />
                   </PaginationItem>
                 </PaginationContent>
