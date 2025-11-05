@@ -3,9 +3,9 @@ import { ReportPreview } from "@/components/ReportPreview";
 
 const Index = () => {
   return (
-    <div className="flex h-[calc(100vh-3rem)] overflow-hidden max-h-[calc(100vh-3rem)]">
+    <div className="flex h-[calc(100vh-3rem)] overflow-hidden">
       {/* Chat Interface */}
-      <div className="min-w-[320px] w-96 max-w-[400px] border-r bg-card/30 backdrop-blur overflow-hidden">
+      <div className="min-w-[320px] w-96 max-w-[400px] border-r bg-card/30 backdrop-blur">
         <ChatInterface />
       </div>
       
