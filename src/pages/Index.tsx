@@ -10,7 +10,7 @@ const Index = () => {
       </div>
       
       {/* Report Preview */}
-      <div className="flex-1 bg-background">
+      <div className="flex-1 bg-background overflow-hidden">
         <ReportPreview />
       </div>
     </div>
