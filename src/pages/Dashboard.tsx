@@ -371,7 +371,7 @@ const Dashboard = () => {
           </div>
 
           {/* Pagination */}
-          {!loading && filteredReports.length > itemsPerPage && (
+          {!loading && totalPages > 1 && (
             <div className="flex justify-center mt-8">
               <Pagination>
                 <PaginationContent>
