@@ -5,7 +5,7 @@ const Index = () => {
   return (
     <div className="flex h-[calc(100vh-3rem)]">
       {/* Chat Interface */}
-      <div className="w-96 border-r bg-card/30 backdrop-blur">
+      <div className="min-w-[320px] w-96 max-w-[400px] border-r bg-card/30 backdrop-blur">
         <ChatInterface />
       </div>
       

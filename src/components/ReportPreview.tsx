@@ -70,7 +70,7 @@ const renderTable = (tableLines: string[], key: number) => {
   
   return (
     <div key={key} className="my-6 overflow-x-auto">
-      <Table>
+      <Table className="min-w-full">
         <TableHeader>
           <TableRow>
             {headers.map((header, i) => (
@@ -108,7 +108,7 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
           <h3 className="text-lg font-semibold text-gray-900">{apiData.title}</h3>
         )}
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-full">
             <TableHeader>
               <TableRow>
                 {tableData[0]?.map((header, i) => (
@@ -144,7 +144,7 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
         <h3 className="text-lg font-semibold text-gray-900">{apiData.title}</h3>
       )}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="min-w-full border-collapse">
           <thead>
             <tr className="border-b border-gray-200">
               {headers.map((header, i) => (
