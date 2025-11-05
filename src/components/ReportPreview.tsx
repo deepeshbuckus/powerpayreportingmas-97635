@@ -69,7 +69,7 @@ const renderTable = (tableLines: string[], key: number) => {
   );
   
   return (
-    <div key={key} className="my-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+    <div key={key} className="my-6 overflow-x-auto">
       <Table className="min-w-full">
         <TableHeader>
           <TableRow>
@@ -107,7 +107,7 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
         {apiData.title && (
           <h3 className="text-lg font-semibold text-gray-900">{apiData.title}</h3>
         )}
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="overflow-x-auto">
           <Table className="min-w-full">
             <TableHeader>
               <TableRow>
@@ -143,7 +143,7 @@ const renderApiDataTable = (apiData: { title: string; type: string; data: Record
       {apiData.title && (
         <h3 className="text-lg font-semibold text-gray-900">{apiData.title}</h3>
       )}
-      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      <div className="overflow-x-auto">
         <table className="min-w-full border-collapse">
           <thead>
             <tr className="border-b border-gray-200">
