@@ -41,6 +41,16 @@ export interface ReportDataResponse {
   data?: string[][];
 }
 
+export interface ReportTemplate {
+  report_template_id: UUID;
+  report_template_name: string;
+  report_template_description: string;
+}
+
+export interface ReportTemplatesResponse {
+  report_templates: ReportTemplate[];
+}
+
 export type GetToken = () => string | Promise<string | null> | null;
 
 export interface PowerPayApiOptions {
@@ -154,6 +164,11 @@ export class PowerPayApi {
   /** GET /conversations/{reportId}/messages/{messageId}/data */
   getReportData(reportId: UUID, messageId: UUID, signal?: AbortSignal) {
     return this.request<ReportDataResponse>("GET", `/conversations/${reportId}/messages/${messageId}/data`, undefined, signal);
+  }
+
+  /** GET /reports/templates */
+  getReportTemplates(signal?: AbortSignal) {
+    return this.request<ReportTemplatesResponse>("GET", `/reports/templates`, undefined, signal);
   }
 
   /** GET /.well-known/jwks.json (usually not needed by a UI) */

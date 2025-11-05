@@ -10,6 +10,7 @@ import type {
   ConversationResponse,
   ReportResponse,
   ReportDataResponse,
+  ReportTemplatesResponse,
 } from "@/lib/powerpay-api";
 import { PowerPayApi as PowerPayApiClient } from "@/lib/powerpay-api";
 
@@ -37,6 +38,12 @@ export const useReportData = (client: PowerPayApi, reportId?: UUID, messageId?: 
     queryKey: ["conversation", reportId, "messages", messageId, "data"],
     queryFn: () => client.getReportData(reportId!, messageId!),
     enabled,
+  });
+
+export const useReportTemplates = (client: PowerPayApi) =>
+  useQuery<ReportTemplatesResponse, Error>({
+    queryKey: ["reportTemplates"],
+    queryFn: () => client.getReportTemplates(),
   });
 
 // Mutations

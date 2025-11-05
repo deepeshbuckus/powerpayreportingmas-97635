@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useReports } from "@/contexts/ReportContext";
 import { useNavigate } from "react-router-dom";
-import { usePowerPayClient, useReports as usePowerPayReports, useSaveReport } from "@/hooks/usePowerPay";
-import type { UUID } from "@/lib/powerpay-api";
+import { usePowerPayClient, useReports as usePowerPayReports, useSaveReport, useReportTemplates } from "@/hooks/usePowerPay";
+import type { UUID, ReportTemplate } from "@/lib/powerpay-api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -63,7 +63,9 @@ const Dashboard = () => {
     token: import.meta.env.VITE_POWERPAY_BEARER_TOKEN
   });
   const { data: powerPayReports, isLoading: loading } = usePowerPayReports(powerPayClient);
+  const { data: templatesData, isLoading: loadingTemplates } = useReportTemplates(powerPayClient);
   const saveReportMutation = useSaveReport(powerPayClient);
+  const templates = templatesData?.report_templates || [];
   const [searchQuery, setSearchQuery] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,6 +167,40 @@ const Dashboard = () => {
       });
     } catch (error) {
       console.error('Failed to update report name:', error);
+    }
+  };
+
+  const handleRunTemplate = async (template: ReportTemplate) => {
+    try {
+      const response = await powerPayClient.startConversation({
+        prompt: template.report_template_description || template.report_template_name
+      });
+      
+      const messagesResponse = await powerPayClient.getConversationMessages(response.report_id!);
+      const transformedMessages = messagesResponse.messages?.map((msg, index) => ({
+        id: msg.message_id || `msg-${index}`,
+        message_id: msg.message_id,
+        prompt: msg.prompt || '',
+        content: msg.prompt || msg.response || '',
+        response: msg.response || null,
+        tableData: msg.response || null,
+        summary: msg.summary,
+        comprehensiveInfo: msg.comprehensive_information,
+        keyInsights: msg.key_insights,
+        suggestedPrompts: msg.suggested_prompts,
+        role: msg.role || (msg.prompt ? 'user' : 'assistant'),
+        timestamp: new Date().toISOString()
+      })) || [];
+      
+      localStorage.setItem('loadedChatHistory', JSON.stringify(transformedMessages));
+      localStorage.setItem('loadedConversationId', response.report_id!);
+      navigate("/chat");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to run report template. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -280,6 +316,52 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="px-2 pb-8">
         <div className="max-w-6xl mx-auto space-y-6">
+
+          {/* Commonly Used Reports */}
+          {(loadingTemplates || templates.length > 0) && (
+            <div className="pb-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Lightbulb className="w-5 h-5 text-amber-500" />
+                <h2 className="text-xl font-medium text-foreground">Commonly Used Reports</h2>
+              </div>
+              <Separator className="mb-4" />
+              
+              {loadingTemplates ? (
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Card key={i} className="min-w-[280px] p-4 animate-pulse">
+                      <div className="h-5 bg-muted rounded mb-2 w-3/4"></div>
+                      <div className="h-3 bg-muted rounded w-full"></div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  {templates.map((template) => (
+                    <Card 
+                      key={template.report_template_id}
+                      className="min-w-[280px] max-w-[320px] p-5 hover:shadow-lg transition-all cursor-pointer hover:border-primary hover:border-2 flex-shrink-0"
+                      onClick={() => handleRunTemplate(template)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-2">
+                            {template.report_template_name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {template.report_template_description}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Recent Reports Header */}
           <div className="mb-6">
