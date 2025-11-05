@@ -19,7 +19,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Header />
-          <div className="h-[calc(100vh-3rem)] bg-gradient-subtle overflow-hidden">
+          <div className="min-h-screen bg-gradient-subtle">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />

@@ -104,10 +104,6 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground overflow-hidden;
-  }
-  
-  #root {
-    @apply h-screen overflow-hidden;
+    @apply bg-background text-foreground;
   }
 }
