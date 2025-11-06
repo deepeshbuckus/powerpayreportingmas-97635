@@ -227,12 +227,21 @@ export const ReportPreview = () => {
   const [isComprehensiveOpen, setIsComprehensiveOpen] = useState(false);
   const [isFromTemplate, setIsFromTemplate] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [isReportSaved, setIsReportSaved] = useState(false);
   
   // Check if navigation came from a template
   useEffect(() => {
     const fromTemplate = localStorage.getItem('isFromTemplate') === 'true';
     setIsFromTemplate(fromTemplate);
-  }, []);
+    
+    // Check if this report was already saved
+    const savedReportId = localStorage.getItem('savedReportId');
+    if (savedReportId === conversationId) {
+      setIsReportSaved(true);
+    } else {
+      setIsReportSaved(false);
+    }
+  }, [conversationId]);
   
   // Debug logging
   console.log('ReportPreview currentReport:', currentReport);
@@ -284,6 +293,11 @@ export const ReportPreview = () => {
       title: "Success", 
       description: "Report saved successfully"
     });
+    // Mark this report as saved
+    if (conversationId) {
+      localStorage.setItem('savedReportId', conversationId);
+      setIsReportSaved(true);
+    }
     // Clear the template flag after successful save
     localStorage.removeItem('isFromTemplate');
     setIsFromTemplate(false);
@@ -298,9 +312,14 @@ export const ReportPreview = () => {
         </div>
         <div className="flex items-center gap-2">
           {isFromTemplate && (
-            <Button variant="outline" size="sm" onClick={handleSaveReport}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSaveReport}
+              disabled={isReportSaved}
+            >
               <Share2 className="w-4 h-4 mr-2" />
-              Save Report
+              {isReportSaved ? 'Report Saved' : 'Save Report'}
             </Button>
           )}
           <Button size="sm" onClick={handleExport} disabled={isExporting}>
