@@ -86,10 +86,15 @@ export class PowerPayApi {
   private async authHeader(): Promise<Record<string, string>> {
     // Prioritize hardcoded token if provided
     if (this.token) {
+      console.log('[PowerPayApi] Using hardcoded token');
       return { Authorization: `Bearer ${this.token}` };
     }
-    if (!this.getToken) return {};
+    if (!this.getToken) {
+      console.log('[PowerPayApi] No getToken function provided');
+      return {};
+    }
     const token = await this.getToken();
+    console.log('[PowerPayApi] Token from getToken:', token ? `${token.substring(0, 20)}...` : 'null/undefined');
     if (!token) return {};
     return { Authorization: `Bearer ${token}` };
   }
