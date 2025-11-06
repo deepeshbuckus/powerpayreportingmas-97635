@@ -98,6 +98,9 @@ const Dashboard = () => {
   const handleChatRedirect = async () => {
     if (!chatInput.trim() || isStartingChat) return;
     
+    // Clear template flag when navigating from search input
+    localStorage.removeItem('isFromTemplate');
+    
     setIsStartingChat(true);
     try {
       // Call POST /conversations/start
@@ -175,6 +178,9 @@ const Dashboard = () => {
   const handleRunTemplate = async (template: ReportTemplate) => {
     setRunningTemplateId(template.report_template_id);
     try {
+      // Set flag to indicate navigation from template
+      localStorage.setItem('isFromTemplate', 'true');
+      
       // Call the new endpoint to run the template
       const response = await powerPayClient.runReportTemplate(template.report_template_id);
       

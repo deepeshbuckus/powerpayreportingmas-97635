@@ -4,7 +4,7 @@ import { Download, Eye, Share2, Loader2, Lightbulb, Info, ChevronDown, ChevronUp
 import { useReports } from "@/contexts/ReportContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 
@@ -224,6 +224,13 @@ export const ReportPreview = () => {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [isComprehensiveOpen, setIsComprehensiveOpen] = useState(false);
+  const [isFromTemplate, setIsFromTemplate] = useState(false);
+  
+  // Check if navigation came from a template
+  useEffect(() => {
+    const fromTemplate = localStorage.getItem('isFromTemplate') === 'true';
+    setIsFromTemplate(fromTemplate);
+  }, []);
   
   // Debug logging
   console.log('ReportPreview currentReport:', currentReport);
@@ -257,6 +264,14 @@ export const ReportPreview = () => {
       setIsExporting(false);
     }
   };
+
+  const handleSaveReport = async () => {
+    toast({
+      title: "Save Report",
+      description: "Save functionality coming soon.",
+    });
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b bg-card/50 flex items-center justify-between h-[88px]">
@@ -265,10 +280,12 @@ export const ReportPreview = () => {
           <p className="text-sm text-muted-foreground">Live preview of your generated report</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Share2 className="w-4 h-4 mr-2" />
-            Share
-          </Button>
+          {isFromTemplate && (
+            <Button variant="outline" size="sm" onClick={handleSaveReport}>
+              <Share2 className="w-4 h-4 mr-2" />
+              Save Report
+            </Button>
+          )}
           <Button size="sm" onClick={handleExport} disabled={isExporting}>
             {isExporting ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

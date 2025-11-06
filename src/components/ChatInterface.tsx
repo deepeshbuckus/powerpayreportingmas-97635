@@ -243,6 +243,9 @@ export const ChatInterface = () => {
     try {
       let report;
       
+      // Clear template flag when user sends a new message
+      localStorage.removeItem('isFromTemplate');
+      
       // If there's an existing conversation, use sendChatMessage
       if (conversationId && messageId) {
         await sendChatMessage(conversationId, userPrompt);
