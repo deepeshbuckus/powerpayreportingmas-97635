@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
+import { SaveReportDialog } from "@/components/SaveReportDialog";
 
 const renderReportContent = (content: string) => {
   const lines = content.split('\n');
@@ -220,11 +221,12 @@ const exportToCSV = (report: any) => {
 };
 
 export const ReportPreview = () => {
-  const { currentReport } = useReports();
+  const { currentReport, conversationId } = useReports();
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [isComprehensiveOpen, setIsComprehensiveOpen] = useState(false);
   const [isFromTemplate, setIsFromTemplate] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   
   // Check if navigation came from a template
   useEffect(() => {
@@ -265,11 +267,26 @@ export const ReportPreview = () => {
     }
   };
 
-  const handleSaveReport = async () => {
+  const handleSaveReport = () => {
+    if (!conversationId) {
+      toast({
+        title: "Error",
+        description: "No report ID found. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setSaveDialogOpen(true);
+  };
+
+  const handleSaveSuccess = () => {
     toast({
-      title: "Save Report",
-      description: "Save functionality coming soon.",
+      title: "Success", 
+      description: "Report saved successfully"
     });
+    // Clear the template flag after successful save
+    localStorage.removeItem('isFromTemplate');
+    setIsFromTemplate(false);
   };
 
   return (
@@ -460,6 +477,18 @@ export const ReportPreview = () => {
           )}
         </div>
       </div>
+
+      {/* Save Report Dialog */}
+      {conversationId && (
+        <SaveReportDialog
+          open={saveDialogOpen}
+          onOpenChange={setSaveDialogOpen}
+          reportId={conversationId}
+          initialPrompt={currentReport?.description || ''}
+          mode="create"
+          onSaveSuccess={handleSaveSuccess}
+        />
+      )}
     </div>
   );
 };
