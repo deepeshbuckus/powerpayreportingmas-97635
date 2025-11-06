@@ -172,30 +172,49 @@ const Dashboard = () => {
 
   const handleRunTemplate = async (template: ReportTemplate) => {
     try {
-      const response = await powerPayClient.startConversation({
-        prompt: template.report_template_description || template.report_template_name
-      });
+      // Call the new endpoint to run the template
+      const response = await powerPayClient.runReportTemplate(template.report_template_id);
       
-      const messagesResponse = await powerPayClient.getConversationMessages(response.report_id!);
-      const transformedMessages = messagesResponse.messages?.map((msg, index) => ({
-        id: msg.message_id || `msg-${index}`,
-        message_id: msg.message_id,
-        prompt: msg.prompt || '',
-        content: msg.prompt || msg.response || '',
-        response: msg.response || null,
-        tableData: msg.response || null,
-        summary: msg.summary,
-        comprehensiveInfo: msg.comprehensive_information,
-        keyInsights: msg.key_insights,
-        suggestedPrompts: msg.suggested_prompts,
-        role: msg.role || (msg.prompt ? 'user' : 'assistant'),
-        timestamp: new Date().toISOString()
-      })) || [];
+      // Transform the report_data into the message format expected by the chat interface
+      const transformedMessages = [
+        // User message (the initial template prompt)
+        {
+          id: `template-prompt-${Date.now()}`,
+          message_id: undefined,
+          prompt: template.report_template_description || template.report_template_name,
+          content: template.report_template_description || template.report_template_name,
+          response: null,
+          tableData: null,
+          summary: null,
+          comprehensiveInfo: null,
+          keyInsights: null,
+          suggestedPrompts: null,
+          role: 'user',
+          timestamp: new Date().toISOString()
+        },
+        // Assistant message (the report data)
+        {
+          id: `template-response-${Date.now()}`,
+          message_id: undefined,
+          prompt: '',
+          content: '',
+          response: response.report_data,
+          tableData: response.report_data,
+          summary: `${template.report_template_name} - Pre-generated Report`,
+          comprehensiveInfo: template.report_template_description,
+          keyInsights: null,
+          suggestedPrompts: null,
+          role: 'assistant',
+          timestamp: new Date().toISOString()
+        }
+      ];
       
+      // Store in localStorage using the report_id from the response
       localStorage.setItem('loadedChatHistory', JSON.stringify(transformedMessages));
-      localStorage.setItem('loadedConversationId', response.report_id!);
+      localStorage.setItem('loadedConversationId', response.report_id);
       navigate("/chat");
     } catch (error) {
+      console.error('Error running template:', error);
       toast({
         title: "Error",
         description: "Failed to run report template. Please try again.",
