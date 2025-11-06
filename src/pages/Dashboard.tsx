@@ -93,6 +93,7 @@ const Dashboard = () => {
     name: string;
     description: string;
   } | null>(null);
+  const [runningTemplateId, setRunningTemplateId] = useState<string | null>(null);
 
   const handleChatRedirect = async () => {
     if (!chatInput.trim() || isStartingChat) return;
@@ -172,6 +173,7 @@ const Dashboard = () => {
   };
 
   const handleRunTemplate = async (template: ReportTemplate) => {
+    setRunningTemplateId(template.report_template_id);
     try {
       // Call the new endpoint to run the template
       const response = await powerPayClient.runReportTemplate(template.report_template_id);
@@ -221,6 +223,8 @@ const Dashboard = () => {
         description: "Failed to run report template. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setRunningTemplateId(null);
     }
   };
 
@@ -363,27 +367,36 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                  {templates.map((template) => (
-                    <Card 
-                      key={template.report_template_id}
-                      className="min-w-[280px] max-w-[320px] p-5 hover:shadow-lg transition-all cursor-pointer hover:border-primary hover:border-2 flex-shrink-0"
-                      onClick={() => handleRunTemplate(template)}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <FileText className="w-5 h-5 text-blue-600" />
+                  {templates.map((template) => {
+                    const isLoading = runningTemplateId === template.report_template_id;
+                    return (
+                      <Card 
+                        key={template.report_template_id}
+                        className={`min-w-[280px] max-w-[320px] p-5 hover:shadow-lg transition-all cursor-pointer hover:border-primary hover:border-2 flex-shrink-0 ${
+                          runningTemplateId && !isLoading ? 'opacity-50 pointer-events-none' : ''
+                        }`}
+                        onClick={() => !runningTemplateId && handleRunTemplate(template)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                            {isLoading ? (
+                              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                            ) : (
+                              <FileText className="w-5 h-5 text-blue-600" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-2">
+                              {template.report_template_name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {template.report_template_description}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-2">
-                            {template.report_template_name}
-                          </h3>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {template.report_template_description}
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </div>
