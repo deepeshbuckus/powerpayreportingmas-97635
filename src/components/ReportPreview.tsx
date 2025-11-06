@@ -232,7 +232,10 @@ export const ReportPreview = () => {
   // Check if navigation came from a template
   useEffect(() => {
     const fromTemplate = localStorage.getItem('isFromTemplate') === 'true';
-    setIsFromTemplate(fromTemplate);
+    const loadedConversationId = localStorage.getItem('loadedConversationId');
+    
+    // Only show save button if it's from template AND not loading an existing report
+    setIsFromTemplate(fromTemplate && !loadedConversationId);
     
     // Check if this report was already saved
     const savedReportId = localStorage.getItem('savedReportId');
