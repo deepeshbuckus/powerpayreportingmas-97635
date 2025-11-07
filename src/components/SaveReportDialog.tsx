@@ -95,6 +95,10 @@ export function SaveReportDialog({
           prompt: msg.prompt,
           response: msg.role === 'assistant' && Array.isArray(msg.response) ? msg.response : null,
           tableData: msg.role === 'assistant' && Array.isArray(msg.response) ? msg.response : null,
+          summary: msg.summary,
+          comprehensiveInfo: msg.comprehensive_information,
+          keyInsights: msg.key_insights,
+          suggestedPrompts: msg.suggested_prompts,
           timestamp: new Date().toISOString()
         }));
 
