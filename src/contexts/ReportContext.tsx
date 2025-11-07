@@ -467,10 +467,61 @@ export const ReportProvider = ({ children }: { children: ReactNode }) => {
       
       const messages = response.messages || [];
       
-      // For each message, we could fetch data if needed
+      // Helper function to extract insights from nested prompt JSON
+      const extractInsightsFromPrompt = (prompt: string | null): any => {
+        if (!prompt) return null;
+        
+        try {
+          // The prompt field contains a stringified Python dict-like structure
+          const promptStr = prompt.replace(/'/g, '"'); // Replace single quotes with double quotes
+          const parsed = JSON.parse(promptStr);
+          
+          if (parsed.output && Array.isArray(parsed.output) && parsed.output.length > 0) {
+            const output = parsed.output[0];
+            if (output.content && Array.isArray(output.content) && output.content.length > 0) {
+              return output.content[0];
+            }
+          }
+        } catch (e) {
+          console.warn('[DEBUG] Failed to parse prompt JSON:', e);
+        }
+        
+        return null;
+      };
+      
+      // For each message, extract insights and update the current report
       for (const message of messages) {
         if (message.message_id) {
-          console.log('Message:', message);
+          const nestedInsights = extractInsightsFromPrompt(message.prompt);
+          
+          // Update current report with insights from the latest assistant message
+          if (message.role === 'assistant' && (nestedInsights || message.summary)) {
+            const tableData = nestedInsights?.response || message.response;
+            
+            if (currentReport) {
+              const updatedReport = {
+                ...currentReport,
+                summary: message.summary || nestedInsights?.summary,
+                comprehensiveInfo: message.comprehensive_information || nestedInsights?.comprehensive_information,
+                keyInsights: message.key_insights || nestedInsights?.key_insights,
+                suggestedPrompts: message.suggested_prompts || nestedInsights?.suggested_prompts,
+                apiData: tableData ? {
+                  title: 'Query Results',
+                  type: 'Query Results',
+                  data: tableData
+                } : currentReport.apiData
+              };
+              
+              setCurrentReport(updatedReport);
+              updateReport(currentReport.id, {
+                summary: updatedReport.summary,
+                comprehensiveInfo: updatedReport.comprehensiveInfo,
+                keyInsights: updatedReport.keyInsights,
+                suggestedPrompts: updatedReport.suggestedPrompts,
+                apiData: updatedReport.apiData
+              });
+            }
+          }
         }
       }
     } catch (error) {
