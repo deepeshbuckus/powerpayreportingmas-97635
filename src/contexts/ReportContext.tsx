@@ -346,7 +346,8 @@ export const ReportProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Invalid response format from API');
       }
 
-      console.log('Continue conversation response:', response);
+      console.log('[DEBUG] Continue conversation response:', response);
+      console.log('[DEBUG] Messages from API:', response.messages);
 
       // Get all messages from the API
       const allMessages = response.messages;
@@ -458,7 +459,11 @@ export const ReportProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchConversationMessages = async (conversationId: string): Promise<void> => {
     try {
+      console.log('[DEBUG] Fetching conversation messages for:', conversationId);
       const response = await powerPayClient.getConversationMessages(conversationId as UUID);
+      
+      console.log('[DEBUG] getConversationMessages API response:', response);
+      console.log('[DEBUG] Messages from getConversationMessages:', response.messages);
       
       const messages = response.messages || [];
       

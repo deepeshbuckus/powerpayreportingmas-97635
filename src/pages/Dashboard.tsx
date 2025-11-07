@@ -129,24 +129,41 @@ const Dashboard = () => {
 
   const handleEditReport = async (conversationId: string) => {
     try {
+      console.log('[DEBUG] handleEditReport - Loading conversation:', conversationId);
       const response = await powerPayClient.getConversationMessages(conversationId as UUID);
+      
+      console.log('[DEBUG] handleEditReport - API response:', response);
+      console.log('[DEBUG] handleEditReport - Messages:', response.messages);
+      
       const allMessages = response.messages || [];
 
       // Transform messages to the expected format - preserve ALL fields
-      const transformedMessages = allMessages.map((msg, index) => ({
-        id: msg.message_id || `msg-${index}`,
-        message_id: msg.message_id,
-        prompt: msg.prompt || '',                    // Keep prompt separate
-        content: msg.prompt || msg.response || '',   // Keep content for display
-        response: msg.response || null,              // Keep response/table data
-        tableData: msg.response || null,             // Keep tableData alias
-        summary: msg.summary,                        // Add summary
-        comprehensiveInfo: msg.comprehensive_information, // Map to camelCase
-        keyInsights: msg.key_insights,               // Map to camelCase
-        suggestedPrompts: msg.suggested_prompts,     // Map to camelCase
-        role: msg.role || (msg.prompt ? 'user' : 'assistant'), // Proper role
-        timestamp: new Date().toISOString()
-      }));
+      const transformedMessages = allMessages.map((msg, index) => {
+        console.log(`[DEBUG] handleEditReport - Transforming message ${index}:`, msg);
+        console.log(`[DEBUG] handleEditReport - Message insights:`, {
+          summary: msg.summary,
+          comprehensive_information: msg.comprehensive_information,
+          key_insights: msg.key_insights,
+          suggested_prompts: msg.suggested_prompts
+        });
+        
+        return {
+          id: msg.message_id || `msg-${index}`,
+          message_id: msg.message_id,
+          prompt: msg.prompt || '',                    // Keep prompt separate
+          content: msg.prompt || msg.response || '',   // Keep content for display
+          response: msg.response || null,              // Keep response/table data
+          tableData: msg.response || null,             // Keep tableData alias
+          summary: msg.summary,                        // Add summary
+          comprehensiveInfo: msg.comprehensive_information, // Map to camelCase
+          keyInsights: msg.key_insights,               // Map to camelCase
+          suggestedPrompts: msg.suggested_prompts,     // Map to camelCase
+          role: msg.role || (msg.prompt ? 'user' : 'assistant'), // Proper role
+          timestamp: new Date().toISOString()
+        };
+      });
+      
+      console.log('[DEBUG] handleEditReport - Transformed messages:', transformedMessages);
 
       // Always store data and navigate, even if empty
       localStorage.setItem('loadedChatHistory', JSON.stringify(transformedMessages));
