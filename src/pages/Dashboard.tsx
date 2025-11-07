@@ -137,55 +137,28 @@ const Dashboard = () => {
       
       const allMessages = response.messages || [];
 
-      // Helper function to extract insights from nested prompt JSON
-      const extractInsightsFromPrompt = (prompt: string | null): any => {
-        if (!prompt) return null;
-        
-        try {
-          // The prompt field contains a stringified Python dict-like structure
-          // We need to parse it to extract the nested insights
-          const promptStr = prompt.replace(/'/g, '"'); // Replace single quotes with double quotes
-          const parsed = JSON.parse(promptStr);
-          
-          if (parsed.output && Array.isArray(parsed.output) && parsed.output.length > 0) {
-            const output = parsed.output[0];
-            if (output.content && Array.isArray(output.content) && output.content.length > 0) {
-              return output.content[0]; // This contains the insights
-            }
-          }
-        } catch (e) {
-          console.warn('[DEBUG] Failed to parse prompt JSON:', e);
-        }
-        
-        return null;
-      };
-
       // Transform messages to the expected format - preserve ALL fields
       const transformedMessages = allMessages.map((msg, index) => {
         console.log(`[DEBUG] handleEditReport - Transforming message ${index}:`, msg);
-        
-        // Extract insights from nested prompt structure if top-level fields are null
-        const nestedInsights = extractInsightsFromPrompt(msg.prompt);
-        
         console.log(`[DEBUG] handleEditReport - Message insights:`, {
-          summary: msg.summary || nestedInsights?.summary,
-          comprehensive_information: msg.comprehensive_information || nestedInsights?.comprehensive_information,
-          key_insights: msg.key_insights || nestedInsights?.key_insights,
-          suggested_prompts: msg.suggested_prompts || nestedInsights?.suggested_prompts
+          summary: msg.summary,
+          comprehensive_information: msg.comprehensive_information,
+          key_insights: msg.key_insights,
+          suggested_prompts: msg.suggested_prompts
         });
         
         return {
           id: msg.message_id || `msg-${index}`,
           message_id: msg.message_id,
-          prompt: msg.prompt || '',
-          content: msg.prompt || msg.response || '',
-          response: nestedInsights?.response || msg.response || null,
-          tableData: nestedInsights?.response || msg.response || null,
-          summary: msg.summary || nestedInsights?.summary,
-          comprehensiveInfo: msg.comprehensive_information || nestedInsights?.comprehensive_information,
-          keyInsights: msg.key_insights || nestedInsights?.key_insights,
-          suggestedPrompts: msg.suggested_prompts || nestedInsights?.suggested_prompts,
-          role: msg.role || (msg.prompt ? 'user' : 'assistant'),
+          prompt: msg.prompt || '',                    // Keep prompt separate
+          content: msg.prompt || msg.response || '',   // Keep content for display
+          response: msg.response || null,              // Keep response/table data
+          tableData: msg.response || null,             // Keep tableData alias
+          summary: msg.summary,                        // Add summary
+          comprehensiveInfo: msg.comprehensive_information, // Map to camelCase
+          keyInsights: msg.key_insights,               // Map to camelCase
+          suggestedPrompts: msg.suggested_prompts,     // Map to camelCase
+          role: msg.role || (msg.prompt ? 'user' : 'assistant'), // Proper role
           timestamp: new Date().toISOString()
         };
       });
