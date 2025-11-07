@@ -49,15 +49,39 @@ export function useCustomAIReportChat(): UseCustomAIReportChatResult {
           setConversationId(loadedConvId);
           
           // Find message with data for currentReport
-          const messagesWithData = parsedHistory.filter((msg: any) => 
+          console.log('[DEBUG] useCustomAIReportChat - parsedHistory:', parsedHistory);
+
+          // First try to find messages with response/tableData arrays
+          let messagesWithData = parsedHistory.filter((msg: any) => 
             (msg.response && Array.isArray(msg.response)) || (msg.tableData && Array.isArray(msg.tableData))
           );
+
+          console.log('[DEBUG] useCustomAIReportChat - messagesWithData:', messagesWithData);
+
+          // If no messages with data, try to find assistant messages with insights
+          if (messagesWithData.length === 0) {
+            messagesWithData = parsedHistory.filter((msg: any) => 
+              msg.role === 'assistant' && (msg.summary || msg.comprehensiveInfo || msg.comprehensive_information)
+            );
+            console.log('[DEBUG] useCustomAIReportChat - messagesWithInsights:', messagesWithData);
+          }
+
           const messageWithData = messagesWithData.length > 0 
             ? messagesWithData[messagesWithData.length - 1] 
             : null;
-          
+
+          console.log('[DEBUG] useCustomAIReportChat - messageWithData:', messageWithData);
+
           if (messageWithData) {
             const tableData = messageWithData.response || messageWithData.tableData;
+            console.log('[DEBUG] useCustomAIReportChat - Creating currentReport with:', {
+              summary: messageWithData.summary,
+              comprehensiveInfo: messageWithData.comprehensiveInfo || messageWithData.comprehensive_information,
+              keyInsights: messageWithData.keyInsights || messageWithData.key_insights,
+              suggestedPrompts: messageWithData.suggestedPrompts || messageWithData.suggested_prompts,
+              hasTableData: !!tableData
+            });
+            
             setCurrentReport({
               id: loadedConvId,
               title: 'Query Results',
@@ -71,12 +95,14 @@ export function useCustomAIReportChat(): UseCustomAIReportChatResult {
               comprehensiveInfo: messageWithData.comprehensiveInfo || messageWithData.comprehensive_information,
               keyInsights: messageWithData.keyInsights || messageWithData.key_insights,
               suggestedPrompts: messageWithData.suggestedPrompts || messageWithData.suggested_prompts,
-              apiData: {
+              apiData: tableData ? {
                 title: 'Query Results',
                 type: 'Query Results',
                 data: tableData
-              }
+              } : undefined
             });
+          } else {
+            console.log('[DEBUG] useCustomAIReportChat - No message with data or insights found!');
           }
           
           // Transform messages for display
