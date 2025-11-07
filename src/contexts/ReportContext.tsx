@@ -459,8 +459,9 @@ export const ReportProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchConversationMessages = async (conversationId: string): Promise<void> => {
     try {
-      console.log('[DEBUG] Fetching conversation messages for:', conversationId);
+      console.log('[DEBUG] fetchConversationMessages - conversationId:', conversationId);
       const response = await powerPayClient.getConversationMessages(conversationId as UUID);
+      console.log('[DEBUG] fetchConversationMessages - response:', response);
       
       console.log('[DEBUG] getConversationMessages API response:', response);
       console.log('[DEBUG] Messages from getConversationMessages:', response.messages);
