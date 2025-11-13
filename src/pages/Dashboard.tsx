@@ -389,7 +389,7 @@ const Dashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                   {templates.map((template) => {
                     const isLoading = runningTemplateId === template.report_template_id;
                     return (
