@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useReports } from "@/contexts/ReportContext";
 import { useNavigate } from "react-router-dom";
 import { usePowerPayClient, useReports as usePowerPayReports, useSaveReport, useReportTemplates } from "@/hooks/usePowerPay";
@@ -34,7 +34,9 @@ import {
   Lightbulb,
   Send,
   Clock,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -86,6 +88,9 @@ const Dashboard = () => {
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [currentReportId, setCurrentReportId] = useState<UUID | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<{
@@ -251,6 +256,41 @@ const Dashboard = () => {
     }
   };
 
+  const checkScrollPosition = () => {
+    if (carouselRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scrollCarousel = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const scrollAmount = 320; // Card width + gap
+      const newScrollLeft = direction === 'left' 
+        ? carouselRef.current.scrollLeft - scrollAmount
+        : carouselRef.current.scrollLeft + scrollAmount;
+      
+      carouselRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    checkScrollPosition();
+    const carousel = carouselRef.current;
+    if (carousel) {
+      carousel.addEventListener('scroll', checkScrollPosition);
+      window.addEventListener('resize', checkScrollPosition);
+      return () => {
+        carousel.removeEventListener('scroll', checkScrollPosition);
+        window.removeEventListener('resize', checkScrollPosition);
+      };
+    }
+  }, [templates]);
+
   const filteredReports = reports.filter(report =>
     (report.reportName?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
     report.defaultTitle.toLowerCase().includes(searchQuery.toLowerCase())
@@ -389,7 +429,35 @@ const Dashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="relative">
+                  {/* Left Arrow */}
+                  {showLeftArrow && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full shadow-lg bg-background hover:bg-accent"
+                      onClick={() => scrollCarousel('left')}
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                  )}
+                  
+                  {/* Right Arrow */}
+                  {showRightArrow && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full shadow-lg bg-background hover:bg-accent"
+                      onClick={() => scrollCarousel('right')}
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  )}
+                  
+                  <div 
+                    ref={carouselRef}
+                    className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
+                  >
                   {templates.map((template) => {
                     const isLoading = runningTemplateId === template.report_template_id;
                     return (
@@ -420,6 +488,7 @@ const Dashboard = () => {
                       </Card>
                     );
                   })}
+                  </div>
                 </div>
               )}
             </div>
