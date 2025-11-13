@@ -18,6 +18,7 @@ interface Message {
   comprehensiveInfo?: string;
   keyInsights?: string[];
   suggestedPrompts?: string[];
+  isThinking?: boolean;
 }
 
 const promptingTips = [
@@ -26,6 +27,17 @@ const promptingTips = [
   "Include pay codes: \"overtime\", \"bonuses\", \"healthcare deductions\"",
   "Ask for comparisons: \"compare this quarter to last quarter\""
 ];
+
+const ThinkingIndicator = () => (
+  <div className="flex items-center gap-1 px-2 py-1">
+    <div className="w-2 h-2 bg-primary/60 rounded-full animate-[typing-dot_1.4s_infinite]" 
+         style={{ animationDelay: '0s' }} />
+    <div className="w-2 h-2 bg-primary/60 rounded-full animate-[typing-dot_1.4s_infinite]" 
+         style={{ animationDelay: '0.2s' }} />
+    <div className="w-2 h-2 bg-primary/60 rounded-full animate-[typing-dot_1.4s_infinite]" 
+         style={{ animationDelay: '0.4s' }} />
+  </div>
+);
 
 export const ChatInterface = () => {
   const { generateReportFromPrompt, currentReport, messageId, conversationId, setMessageId, sendChatMessage, fetchAttachmentResult, setSessionData, setCurrentReport } = useReports();
@@ -344,13 +356,19 @@ export const ChatInterface = () => {
                       : "bg-card border"
                   )}
                 >
-                  <p className="text-sm leading-relaxed">{message.content}</p>
-                  <span className={cn(
-                    "text-xs opacity-70 mt-1 block",
-                    message.sender === 'user' ? "text-primary-foreground/70" : "text-muted-foreground"
-                  )}>
-                    {message.timestamp.toLocaleTimeString()}
-                  </span>
+                  {message.isThinking ? (
+                    <ThinkingIndicator />
+                  ) : (
+                    <>
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      <span className={cn(
+                        "text-xs opacity-70 mt-1 block",
+                        message.sender === 'user' ? "text-primary-foreground/70" : "text-muted-foreground"
+                      )}>
+                        {message.timestamp.toLocaleTimeString()}
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 {message.sender === 'user' && (
