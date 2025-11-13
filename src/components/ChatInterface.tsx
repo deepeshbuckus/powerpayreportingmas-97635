@@ -246,9 +246,10 @@ export const ChatInterface = () => {
     // Add AI thinking message
     const thinkingMessage: Message = {
       id: (Date.now() + 1).toString(),
-      content: "I'm analyzing your requirements and generating a comprehensive report. This may take a moment...",
+      content: "",
       sender: 'assistant',
-      timestamp: new Date()
+      timestamp: new Date(),
+      isThinking: true
     };
     setMessages(prev => [...prev, thinkingMessage]);
 
