@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,6 +7,7 @@ import { Send, Bot, User, Loader2, Lightbulb } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useReports } from "@/contexts/ReportContext";
+import { usePowerPayClient } from "@/hooks/usePowerPay";
 
 interface Message {
   id: string;
@@ -53,6 +54,12 @@ export const ChatInterface = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const chatHistoryInitialized = useRef(false);
   const pendingPromptProcessed = useRef(false);
+  const pendingTemplateProcessed = useRef(false);
+  
+  const powerPayClient = usePowerPayClient({ 
+    baseUrl: 'https://ppcustomreport-crg4b5g5gccfgmhn.canadacentral-01.azurewebsites.net',
+    token: 'eyJhbGciOiJSUzUxMiJ9.eyJyb2xlIjp7InBhZ2UiOm51bGwsImVtcGxveWVlIjpudWxsLCJmaWVsZCI6bnVsbH0sInNyYyI6IlBPV0VSUEFZSFJTRUxGU0VSVklDRSIsImNyZWF0ZWQiOjE3NjI0MTYwNzA2MTUsImlkIjo1MTA4NSwicGF5cm9sbElkIjoyODE0MjgsImRiVXNlcklkIjo1MTA4NSwiZXhwIjoxNzYyNDE2NjcwLCJpYXQiOjE3NjI0MTYwNzAsImlzTWlncmF0ZWQiOnRydWV9.F-uhGMjzYE_UNGgw34OUZN2jWBEqtSF4-WBG5FeQML29ayuRbyf5JP_t-iPXZXO_4yJvwwYSbfCZEJKAZuUH0YcmghC7XxhTndS14MI1PxHWPDqC6wpNbPKI0_VLGJ1Fu1hNhm5boJFTENu8_2tszEL7hCmg-FkONE3g9sfvQGC8ENSc3GV-MfhIuD8whNPIwuoHsgSSavA2vtoPIOmHbRbF-OFcSNrkCuNp1nNoMl0RVPImRO-8wn8egHarNdb-6Hf-202HnX3NbCjQQXsVfg461dgpHWH6aND8xVyhjvS6bXgOcm0icibYgLWQobFvDKANa2D3mMcjwa11g5Bepw'
+  });
 
   // Handle pending prompt from dashboard redirect
   useEffect(() => {
@@ -77,6 +84,125 @@ export const ChatInterface = () => {
       handleSendMessageWithPrompt(pendingPrompt);
     }
   }, []);
+
+  // Handle pending template from Dashboard - similar flow with thinking indicator
+  useEffect(() => {
+    if (pendingTemplateProcessed.current) return;
+    
+    const pendingTemplateStr = localStorage.getItem('pendingTemplate');
+    if (pendingTemplateStr) {
+      pendingTemplateProcessed.current = true;
+      localStorage.removeItem('pendingTemplate');
+      
+      const template = JSON.parse(pendingTemplateStr);
+      handleRunTemplateInChat(template);
+    }
+  }, []);
+
+  // Handle running a template in the chat with thinking indicator
+  const handleRunTemplateInChat = useCallback(async (template: { id: string; name: string; description: string }) => {
+    // Add user message with template name
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: `Generate ${template.name}`,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    setIsGenerating(true);
+
+    // Add thinking indicator
+    const thinkingId = (Date.now() + 1).toString();
+    const thinkingMessage: Message = {
+      id: thinkingId,
+      content: "",
+      sender: 'assistant',
+      timestamp: new Date(),
+      isThinking: true
+    };
+    setMessages(prev => [...prev, thinkingMessage]);
+
+    try {
+      const response = await powerPayClient.runReportTemplate(template.id);
+      // Cast to extended type that may have additional fields from API
+      const extResponse = response as any;
+
+      const tableData = response.report_data || [];
+      const headerRow = Array.isArray(tableData[0]) ? tableData[0] : [];
+      const totalRecords = tableData.length > 1 ? tableData.length - 1 : 0;
+
+      // Update current report
+      setCurrentReport({
+        id: response.report_id,
+        title: template.name,
+        description: template.description || '',
+        content: '',
+        status: 'published' as const,
+        type: 'data-report',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        summary: extResponse.summary || `This report contains ${totalRecords} employee records with ${headerRow.length} data columns.`,
+        comprehensiveInfo: extResponse.comprehensive_information || `The ${template.name} provides detailed employee payroll information.`,
+        keyInsights: extResponse.key_insights || [
+          `Total of ${totalRecords} employees in the report`,
+          `Report includes ${headerRow.length} data columns`,
+          `Data is current as of ${new Date().toLocaleDateString()}`
+        ],
+        suggestedPrompts: extResponse.suggested_prompts || [
+          'Show me employees by department',
+          'Filter by salary range',
+          'Export this data to CSV'
+        ],
+        apiData: {
+          title: template.name,
+          type: 'Query Results',
+          data: tableData
+        }
+      });
+
+      // Set session data for save functionality
+      setSessionData(null, response.report_id);
+
+      // Replace thinking message with success message
+      const aiResponse: Message = {
+        id: thinkingId,
+        content: `I've generated your ${template.name} report with ${totalRecords} records.`,
+        sender: 'assistant',
+        timestamp: new Date(),
+        tableData: tableData,
+        summary: extResponse.summary || `This report contains ${totalRecords} employee records with ${headerRow.length} data columns.`,
+        comprehensiveInfo: extResponse.comprehensive_information || `The ${template.name} provides detailed employee payroll information.`,
+        keyInsights: extResponse.key_insights || [
+          `Total of ${totalRecords} employees in the report`,
+          `Report includes ${headerRow.length} data columns`,
+          `Data is current as of ${new Date().toLocaleDateString()}`
+        ],
+        suggestedPrompts: extResponse.suggested_prompts || [
+          'Show me employees by department',
+          'Filter by salary range',
+          'Export this data to CSV'
+        ]
+      };
+
+      setMessages(prev => prev.map(msg =>
+        msg.id === thinkingId ? aiResponse : msg
+      ));
+    } catch (error) {
+      console.error('Failed to run template:', error);
+      const errorMessage: Message = {
+        id: thinkingId,
+        content: "I'm sorry, I encountered an error generating that report. Please try again.",
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      setMessages(prev => prev.map(msg =>
+        msg.id === thinkingId ? errorMessage : msg
+      ));
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [powerPayClient, setCurrentReport, setSessionData]);
 
   // Function to send message with a specific prompt (for pending prompt handling)
   const handleSendMessageWithPrompt = async (prompt: string) => {
