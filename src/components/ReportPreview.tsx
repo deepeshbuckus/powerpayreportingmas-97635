@@ -229,13 +229,16 @@ export const ReportPreview = () => {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [isReportSaved, setIsReportSaved] = useState(false);
   
-  // Check if navigation came from a template
+  // Check if this is a new unsaved conversation that should show Save button
   useEffect(() => {
     const fromTemplate = localStorage.getItem('isFromTemplate') === 'true';
     const loadedConversationId = localStorage.getItem('loadedConversationId');
     
-    // Only show save button if it's from template AND not loading an existing report
-    setIsFromTemplate(fromTemplate && !loadedConversationId);
+    // Show save button for:
+    // 1. Templates (isFromTemplate)
+    // 2. New conversations from prompt (when conversationId exists but not from loaded history)
+    const isNewConversation = conversationId && !loadedConversationId;
+    setIsFromTemplate(fromTemplate || isNewConversation);
     
     // Check if this report was already saved
     const savedReportId = localStorage.getItem('savedReportId');

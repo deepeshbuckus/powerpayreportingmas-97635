@@ -20,13 +20,11 @@ import {
 } from "@/components/ui/pagination";
 import { 
   Search, 
-  Plus, 
+  Plus,
   FileText, 
   Calendar, 
   MoreVertical,
-  Copy,
   Edit,
-  Trash2,
   Eye,
   DollarSign,
   Users,
@@ -85,13 +83,9 @@ const Dashboard = () => {
     }))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const [isStartingChat, setIsStartingChat] = useState(false);
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [currentReportId, setCurrentReportId] = useState<UUID | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
-  const [currentPrompt, setCurrentPrompt] = useState("");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<{
     id: string;
@@ -100,36 +94,20 @@ const Dashboard = () => {
   } | null>(null);
   const [runningTemplateId, setRunningTemplateId] = useState<string | null>(null);
 
-  const handleChatRedirect = async () => {
-    if (!chatInput.trim() || isStartingChat) return;
+  const handleChatRedirect = () => {
+    if (!chatInput.trim()) return;
     
-    // Clear template flag when navigating from search input
+    // Clear template flag and any existing loaded data
     localStorage.removeItem('isFromTemplate');
+    localStorage.removeItem('loadedChatHistory');
+    localStorage.removeItem('loadedConversationId');
     
-    setIsStartingChat(true);
-    try {
-      // Call POST /conversations/start
-      const response = await powerPayClient.startConversation({
-        prompt: chatInput
-      });
-      
-      // Store the prompt and reportId for the dialog
-      setCurrentPrompt(chatInput);
-      setCurrentReportId(response.report_id);
-      setChatInput(""); // Clear input
-      
-      // Open the save report dialog
-      setSaveDialogOpen(true);
-    } catch (error) {
-      console.error('Failed to start conversation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to start conversation. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsStartingChat(false);
-    }
+    // Store the pending prompt for the chat page to pick up
+    localStorage.setItem('pendingPrompt', chatInput);
+    setChatInput(""); // Clear input
+    
+    // Immediately navigate to chat
+    navigate('/chat');
   };
 
   const handleEditReport = async (conversationId: string) => {
@@ -387,13 +365,9 @@ const Dashboard = () => {
                 size="sm" 
                 className="bg-primary hover:bg-primary/90" 
                 onClick={handleChatRedirect}
-                disabled={isStartingChat || !chatInput.trim()}
+                disabled={!chatInput.trim()}
               >
-                {isStartingChat ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
+                <Send className="w-4 h-4" />
               </Button>
             </div>
           </Card>
@@ -658,13 +632,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Save Report Dialog - Always render to ensure it's in DOM */}
-      <SaveReportDialog
-        open={saveDialogOpen && !!currentReportId}
-        onOpenChange={setSaveDialogOpen}
-        reportId={currentReportId || ''}
-        initialPrompt={currentPrompt}
-      />
 
       {/* Edit Report Dialog */}
       {editingReport && (

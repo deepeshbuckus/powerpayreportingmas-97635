@@ -52,6 +52,75 @@ export const ChatInterface = () => {
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const chatHistoryInitialized = useRef(false);
+  const pendingPromptProcessed = useRef(false);
+
+  // Handle pending prompt from dashboard redirect
+  useEffect(() => {
+    if (pendingPromptProcessed.current) return;
+    
+    const pendingPrompt = localStorage.getItem('pendingPrompt');
+    if (pendingPrompt) {
+      pendingPromptProcessed.current = true;
+      localStorage.removeItem('pendingPrompt');
+      
+      // Add user message immediately
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        content: pendingPrompt,
+        sender: 'user',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+      
+      // Trigger report generation
+      handleSendMessageWithPrompt(pendingPrompt);
+    }
+  }, []);
+
+  // Function to send message with a specific prompt (for pending prompt handling)
+  const handleSendMessageWithPrompt = async (prompt: string) => {
+    setIsGenerating(true);
+    
+    // Add AI thinking message
+    const thinkingMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content: "",
+      sender: 'assistant',
+      timestamp: new Date(),
+      isThinking: true
+    };
+    setMessages(prev => [...prev, thinkingMessage]);
+    
+    try {
+      const report = await generateReportFromPrompt(prompt);
+      
+      // Update the thinking message with the actual response
+      const aiResponse: Message = {
+        id: thinkingMessage.id,
+        content: `Perfect! I've generated a comprehensive ${report?.type || 'report'} titled "${report?.title || 'New Report'}". The report includes detailed analysis${report?.apiData?.data?.length ? ` with ${report.apiData.data.length} records` : ''}. You can view the full report in the preview panel and access it from your dashboard.`,
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => prev.map(msg => 
+        msg.id === thinkingMessage.id ? aiResponse : msg
+      ));
+    } catch (error) {
+      const errorMessage: Message = {
+        id: thinkingMessage.id,
+        content: "I apologize, but there was an error generating your report. Please try again with a different prompt.",
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => prev.map(msg => 
+        msg.id === thinkingMessage.id ? errorMessage : msg
+      ));
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   // Initialize chat history when there's an existing session or loaded data
   useEffect(() => {
