@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { ReportProvider } from "@/contexts/ReportContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -18,7 +17,6 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Header />
           <div className="min-h-screen bg-gradient-subtle">
             <Routes>
               <Route path="/" element={<Dashboard />} />

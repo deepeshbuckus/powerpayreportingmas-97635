@@ -314,7 +314,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="h-[calc(100vh-3rem)] overflow-y-auto bg-background">
+    <div className="h-screen overflow-y-auto bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
