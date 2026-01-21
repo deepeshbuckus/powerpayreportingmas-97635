@@ -5,7 +5,7 @@ const Index = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Chat Interface */}
-      <div className="min-w-[320px] w-96 max-w-[400px] border-r bg-card/30 backdrop-blur">
+      <div className="min-w-[320px] w-96 max-w-[400px] border-r bg-card/30 backdrop-blur h-full">
         <ChatInterface />
       </div>
       
