@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, Bot, User, Loader2, Lightbulb } from "lucide-react";
+import { Send, Bot, User, Loader2, Lightbulb, ArrowLeft } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useReports } from "@/contexts/ReportContext";
@@ -41,6 +42,7 @@ const ThinkingIndicator = () => (
 );
 
 export const ChatInterface = () => {
+  const navigate = useNavigate();
   const { generateReportFromPrompt, currentReport, messageId, conversationId, setMessageId, sendChatMessage, fetchAttachmentResult, setSessionData, setCurrentReport } = useReports();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -523,9 +525,20 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-subtle">
-      <div className="p-4 border-b bg-card/50 h-[88px] flex flex-col justify-center">
-        <h2 className="font-semibold text-foreground">HR Report Assistant</h2>
-        <p className="text-sm text-muted-foreground">Describe the HR or payroll report you want to generate</p>
+      <div className="p-4 border-b bg-card/50 flex flex-col gap-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => navigate(-1)} 
+          className="gap-2 w-fit -ml-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+        <div>
+          <h2 className="font-semibold text-foreground">HR Report Assistant</h2>
+          <p className="text-sm text-muted-foreground">Describe the HR or payroll report you want to generate</p>
+        </div>
       </div>
 
       <ScrollArea className="flex-1 px-4">
