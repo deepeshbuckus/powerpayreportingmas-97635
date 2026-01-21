@@ -92,7 +92,7 @@ const Dashboard = () => {
     name: string;
     description: string;
   } | null>(null);
-  const [runningTemplateId, setRunningTemplateId] = useState<string | null>(null);
+  
 
   const handleChatRedirect = () => {
     if (!chatInput.trim()) return;
@@ -175,63 +175,24 @@ const Dashboard = () => {
     }
   };
 
-  const handleRunTemplate = async (template: ReportTemplate) => {
-    setRunningTemplateId(template.report_template_id);
-    try {
-      // Set flag to indicate navigation from template
-      localStorage.setItem('isFromTemplate', 'true');
-      
-      // Call the new endpoint to run the template
-      const response = await powerPayClient.runReportTemplate(template.report_template_id);
-      
-      // Transform the report_data into the message format expected by the chat interface
-      const transformedMessages = [
-        // User message (the initial template prompt)
-        {
-          id: `template-prompt-${Date.now()}`,
-          message_id: undefined,
-          prompt: template.report_template_description || template.report_template_name,
-          content: template.report_template_description || template.report_template_name,
-          response: null,
-          tableData: null,
-          summary: null,
-          comprehensiveInfo: null,
-          keyInsights: null,
-          suggestedPrompts: null,
-          role: 'user',
-          timestamp: new Date().toISOString()
-        },
-        // Assistant message (the report data)
-        {
-          id: `template-response-${Date.now()}`,
-          message_id: undefined,
-          prompt: '',
-          content: '',
-          response: response.report_data,
-          tableData: response.report_data,
-          summary: `${template.report_template_name} - Pre-generated Report`,
-          comprehensiveInfo: template.report_template_description,
-          keyInsights: null,
-          suggestedPrompts: null,
-          role: 'assistant',
-          timestamp: new Date().toISOString()
-        }
-      ];
-      
-      // Store in localStorage using the report_id from the response
-      localStorage.setItem('loadedChatHistory', JSON.stringify(transformedMessages));
-      localStorage.setItem('loadedConversationId', response.report_id);
-      navigate("/chat");
-    } catch (error) {
-      console.error('Error running template:', error);
-      toast({
-        title: "Error",
-        description: "Failed to run report template. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setRunningTemplateId(null);
-    }
+  const handleRunTemplate = (template: ReportTemplate) => {
+    // Store template info for chat page to process
+    localStorage.setItem('pendingTemplate', JSON.stringify({
+      id: template.report_template_id,
+      name: template.report_template_name,
+      description: template.report_template_description
+    }));
+    
+    // Set flag for save button visibility
+    localStorage.setItem('isFromTemplate', 'true');
+    
+    // Clear any existing data
+    localStorage.removeItem('loadedChatHistory');
+    localStorage.removeItem('loadedConversationId');
+    localStorage.removeItem('pendingPrompt');
+    
+    // Navigate immediately
+    navigate('/chat');
   };
 
   const checkScrollPosition = () => {
@@ -436,36 +397,27 @@ const Dashboard = () => {
                     ref={carouselRef}
                     className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
                   >
-                    {templates.map((template) => {
-                      const isLoading = runningTemplateId === template.report_template_id;
-                      return (
-                        <Card 
-                          key={template.report_template_id}
-                          className={`min-w-[280px] max-w-[320px] p-5 hover:shadow-lg transition-all cursor-pointer hover:border-primary hover:border-2 flex-shrink-0 ${
-                            runningTemplateId && !isLoading ? 'opacity-50 pointer-events-none' : ''
-                          }`}
-                          onClick={() => !runningTemplateId && handleRunTemplate(template)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                              {isLoading ? (
-                                <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-                              ) : (
-                                <FileText className="w-5 h-5 text-blue-600" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-2">
-                                {template.report_template_name}
-                              </h3>
-                              <p className="text-xs text-muted-foreground line-clamp-2">
-                                {template.report_template_description}
-                              </p>
-                            </div>
+                    {templates.map((template) => (
+                      <Card 
+                        key={template.report_template_id}
+                        className="min-w-[280px] max-w-[320px] p-5 hover:shadow-lg transition-all cursor-pointer hover:border-primary hover:border-2 flex-shrink-0"
+                        onClick={() => handleRunTemplate(template)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-5 h-5 text-primary" />
                           </div>
-                        </Card>
-                      );
-                    })}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-2">
+                              {template.report_template_name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {template.report_template_description || "Click to generate this report"}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 </div>
               ) : (
