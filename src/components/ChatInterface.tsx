@@ -525,7 +525,7 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-subtle">
-      <div className="p-4 border-b bg-card/50 flex items-center gap-3">
+      <div className="p-4 border-b bg-card/50 flex items-center gap-3 h-[88px]">
         <Button 
           variant="outline" 
           size="icon" 
