@@ -525,15 +525,14 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-subtle">
-      <div className="p-4 border-b bg-card/50 flex flex-col gap-1">
+      <div className="p-4 border-b bg-card/50 flex items-center gap-3">
         <Button 
-          variant="ghost" 
-          size="sm" 
+          variant="outline" 
+          size="icon" 
           onClick={() => navigate(-1)} 
-          className="gap-2 w-fit"
+          className="rounded-full h-10 w-10 shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
         </Button>
         <div>
           <h2 className="font-semibold text-foreground">HR Report Assistant</h2>
