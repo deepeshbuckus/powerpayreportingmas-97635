@@ -525,12 +525,12 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-subtle">
-      <div className="p-4 border-b bg-card/50 flex flex-col gap-2">
+      <div className="p-4 border-b bg-card/50 flex flex-col gap-1">
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={() => navigate(-1)} 
-          className="gap-2 w-fit -ml-2"
+          className="gap-2 w-fit"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
