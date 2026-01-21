@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
@@ -376,17 +376,21 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="px-2 pb-8">
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto">
+          <Tabs defaultValue="commonly-used" className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+              <TabsTrigger value="commonly-used" className="gap-2">
+                <Lightbulb className="w-4 h-4" />
+                Commonly Used
+              </TabsTrigger>
+              <TabsTrigger value="recent" className="gap-2">
+                <Clock className="w-4 h-4" />
+                Recent Reports
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Commonly Used Reports */}
-          {(loadingTemplates || templates.length > 0) && (
-            <div className="pb-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Lightbulb className="w-5 h-5 text-amber-500" />
-                <h2 className="text-xl font-medium text-foreground">Commonly Used Reports</h2>
-              </div>
-              <Separator className="mb-4" />
-              
+            {/* Commonly Used Reports Tab */}
+            <TabsContent value="commonly-used">
               {loadingTemplates ? (
                 <div className="flex gap-4 overflow-x-auto pb-2">
                   {Array.from({ length: 3 }).map((_, i) => (
@@ -402,7 +406,7 @@ const Dashboard = () => {
                     </Card>
                   ))}
                 </div>
-              ) : (
+              ) : templates.length > 0 ? (
                 <div className="relative">
                   {/* Left Arrow */}
                   {showLeftArrow && (
@@ -432,203 +436,207 @@ const Dashboard = () => {
                     ref={carouselRef}
                     className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
                   >
-                  {templates.map((template) => {
-                    const isLoading = runningTemplateId === template.report_template_id;
-                    return (
-                      <Card 
-                        key={template.report_template_id}
-                        className={`min-w-[280px] max-w-[320px] p-5 hover:shadow-lg transition-all cursor-pointer hover:border-primary hover:border-2 flex-shrink-0 ${
-                          runningTemplateId && !isLoading ? 'opacity-50 pointer-events-none' : ''
-                        }`}
-                        onClick={() => !runningTemplateId && handleRunTemplate(template)}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                            {isLoading ? (
-                              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-                            ) : (
-                              <FileText className="w-5 h-5 text-blue-600" />
-                            )}
+                    {templates.map((template) => {
+                      const isLoading = runningTemplateId === template.report_template_id;
+                      return (
+                        <Card 
+                          key={template.report_template_id}
+                          className={`min-w-[280px] max-w-[320px] p-5 hover:shadow-lg transition-all cursor-pointer hover:border-primary hover:border-2 flex-shrink-0 ${
+                            runningTemplateId && !isLoading ? 'opacity-50 pointer-events-none' : ''
+                          }`}
+                          onClick={() => !runningTemplateId && handleRunTemplate(template)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                              {isLoading ? (
+                                <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                              ) : (
+                                <FileText className="w-5 h-5 text-blue-600" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-2">
+                                {template.report_template_name}
+                              </h3>
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {template.report_template_description}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-2">
-                              {template.report_template_name}
-                            </h3>
-                            <p className="text-xs text-muted-foreground line-clamp-2">
-                              {template.report_template_description}
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-                    );
-                  })}
+                        </Card>
+                      );
+                    })}
                   </div>
                 </div>
+              ) : (
+                <Card className="p-12 text-center">
+                  <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Lightbulb className="w-8 h-8 text-accent-foreground" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">No templates available</h3>
+                  <p className="text-muted-foreground">
+                    Report templates will appear here when available
+                  </p>
+                </Card>
               )}
-            </div>
-          )}
+            </TabsContent>
 
-          {/* Recent Reports Header */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-6 h-6 text-muted-foreground" />
-              <h2 className="text-xl font-medium text-muted-foreground">Recent Reports</h2>
-            </div>
-            <Separator />
-          </div>
-
-          {/* Search */}
-          <div className="relative mb-6 w-full md:max-w-[calc(50%-0.75rem)]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search reports..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          {/* Reports Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {loading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="p-6 h-64">
-                  <div className="flex flex-col h-full justify-between animate-pulse">
-                    <div>
-                      <div className="h-6 bg-muted rounded mb-2 w-3/4"></div>
-                      <div className="h-3 bg-muted rounded mb-3 w-1/2"></div>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-muted rounded w-full"></div>
-                        <div className="h-3 bg-muted rounded w-5/6"></div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="h-10 bg-muted rounded flex-1"></div>
-                      <div className="h-10 bg-muted rounded flex-1"></div>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            ) : (
-              paginatedReports.map((report) => (
-                <Card key={report.conversationId} className="p-6 hover:shadow-lg transition-smooth hover:border-blue-500 hover:border-2 cursor-pointer h-64">
-                  <div className="flex flex-col h-full justify-between">
-                    <div>
-                      <h3 className="font-semibold text-foreground text-lg mb-2">
-                        {report.reportName || "Untitled Report - Click to edit"}
-                      </h3>
-                      <div className="text-xs text-muted-foreground mb-3">
-                        Created on {new Date(report.createdAt).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: '2-digit', 
-                          day: '2-digit' 
-                        })}
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {report.defaultTitle}
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2 justify-center">
-                      <Button 
-                        variant="outline" 
-                        size="default" 
-                        className="flex-1"
-                        onClick={() => {
-                          setEditingReport({
-                            id: report.conversationId,
-                            name: report.reportName || '',
-                            description: report.defaultTitle || ''
-                          });
-                          setEditDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button 
-                        size="default" 
-                        className="bg-primary hover:bg-primary/90 flex-1"
-                        onClick={() => handleEditReport(report.conversationId)}
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Run report
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
-
-          {/* Pagination */}
-          {!loading && totalPages > 1 && (
-            <div className="flex justify-center mt-8 py-4">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      aria-disabled={currentPage === 1}
-                    />
-                  </PaginationItem>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    // Show first page, last page, current page, and pages around current
-                    if (
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    ) {
-                      return (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                            className="cursor-pointer"
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    } else if (page === currentPage - 2 || page === currentPage + 2) {
-                      return (
-                        <PaginationItem key={page}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      );
-                    }
-                    return null;
-                  })}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      aria-disabled={currentPage === totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
-
-          {filteredReports.length === 0 && (
-            <Card className="p-12 text-center">
-              <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-8 h-8 text-accent-foreground" />
+            {/* Recent Reports Tab */}
+            <TabsContent value="recent">
+              {/* Search */}
+              <div className="relative mb-6 w-full md:max-w-[calc(50%-0.75rem)]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search reports..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">No reports found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchQuery ? 'Try adjusting your search criteria' : 'Create your first report to get started'}
-              </p>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Report
-              </Button>
-            </Card>
-          )}
+
+              {/* Reports Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {loading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="p-6 h-64">
+                      <div className="flex flex-col h-full justify-between animate-pulse">
+                        <div>
+                          <div className="h-6 bg-muted rounded mb-2 w-3/4"></div>
+                          <div className="h-3 bg-muted rounded mb-3 w-1/2"></div>
+                          <div className="space-y-2">
+                            <div className="h-3 bg-muted rounded w-full"></div>
+                            <div className="h-3 bg-muted rounded w-5/6"></div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="h-10 bg-muted rounded flex-1"></div>
+                          <div className="h-10 bg-muted rounded flex-1"></div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                ) : (
+                  paginatedReports.map((report) => (
+                    <Card key={report.conversationId} className="p-6 hover:shadow-lg transition-smooth hover:border-blue-500 hover:border-2 cursor-pointer h-64">
+                      <div className="flex flex-col h-full justify-between">
+                        <div>
+                          <h3 className="font-semibold text-foreground text-lg mb-2">
+                            {report.reportName || "Untitled Report - Click to edit"}
+                          </h3>
+                          <div className="text-xs text-muted-foreground mb-3">
+                            Created on {new Date(report.createdAt).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: '2-digit', 
+                              day: '2-digit' 
+                            })}
+                          </div>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {report.defaultTitle}
+                          </p>
+                        </div>
+
+                        <div className="flex gap-2 justify-center">
+                          <Button 
+                            variant="outline" 
+                            size="default" 
+                            className="flex-1"
+                            onClick={() => {
+                              setEditingReport({
+                                id: report.conversationId,
+                                name: report.reportName || '',
+                                description: report.defaultTitle || ''
+                              });
+                              setEditDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button 
+                            size="default" 
+                            className="bg-primary hover:bg-primary/90 flex-1"
+                            onClick={() => handleEditReport(report.conversationId)}
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            Run report
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                )}
+              </div>
+
+              {/* Pagination */}
+              {!loading && totalPages > 1 && (
+                <div className="flex justify-center mt-8 py-4">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          aria-disabled={currentPage === 1}
+                        />
+                      </PaginationItem>
+                      
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                        if (
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={page}>
+                              <PaginationLink
+                                onClick={() => setCurrentPage(page)}
+                                isActive={currentPage === page}
+                                className="cursor-pointer"
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        } else if (page === currentPage - 2 || page === currentPage + 2) {
+                          return (
+                            <PaginationItem key={page}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          );
+                        }
+                        return null;
+                      })}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          aria-disabled={currentPage === totalPages}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {!loading && filteredReports.length === 0 && (
+                <Card className="p-12 text-center">
+                  <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-accent-foreground" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">No reports found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {searchQuery ? 'Try adjusting your search criteria' : 'Create your first report to get started'}
+                  </p>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Report
+                  </Button>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
