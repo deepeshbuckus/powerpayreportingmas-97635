@@ -524,8 +524,8 @@ export const ChatInterface = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-subtle">
-      <div className="p-4 border-b bg-card/50 flex items-center gap-3 h-[88px]">
+    <div className="flex flex-col h-full bg-gradient-subtle overflow-hidden">
+      <div className="p-4 border-b bg-card/50 flex items-center gap-3 h-[88px] flex-shrink-0">
         <Button 
           variant="outline" 
           size="icon" 
@@ -540,7 +540,7 @@ export const ChatInterface = () => {
         </div>
       </div>
 
-      <ScrollArea className="flex-1 px-4">
+      <ScrollArea className="flex-1 px-4 min-h-0">
         <div className="space-y-4 py-4">
           {messages.map((message, index) => (
             <div key={message.id}>
